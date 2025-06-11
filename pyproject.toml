@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "test_task_ITK-academy"
+version = "0.1.0"
+description = ""
+authors = ["Shilov Ilia <shilov.spike2250@yandex.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.115.12"
+uvicorn = {extras = ["standard"], version = "^0.34.2"}
+pydantic = {extras = ["email"], version = "^2.11.5"}
+pydantic-settings = "^2.9.1"
+sqlalchemy = {extras = ["asyncio"], version = "^2.0.41"}
+asyncpg = "^0.30.0"
+alembic = "^1.16.1"
+orjson = "^3.10.18"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
