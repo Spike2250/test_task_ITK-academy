@@ -8,7 +8,11 @@ from core.schemas.wallet import (
     WalletRead,
     WalletCreate,
 )
-from core.schemas.operation import OperationRequest
+from core.schemas.operation import (
+    OperationRequest,
+    OperationSuccess,
+    OperationFailed,
+)
 
 from .actions import (
     create_new_wallet,
@@ -54,7 +58,7 @@ async def create_wallet(
 
 @router.put(
     "/{wallet_id}/operation",
-    response_model=WalletRead,
+    response_model=OperationSuccess | OperationFailed,
 )
 async def create_transaction(
     wallet_id: uuid.UUID,
@@ -63,7 +67,7 @@ async def create_transaction(
         Depends(db_helper.session_getter),
     ],
     operation: OperationRequest = Depends(),
-) -> Dict:
+):
     return await create_new_transaction(
         wallet_id,
         operation,

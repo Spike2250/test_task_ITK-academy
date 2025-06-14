@@ -6,6 +6,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from core.models.wallet import Wallet
 from core.models.operation import Operation
 from core.schemas.wallet import WalletCreate, WalletRead
+from core.schemas.operation import OperationSuccess, OperationFailed
 from core.schemas.enums import OperationTypes
 
 
@@ -35,14 +36,14 @@ async def get_wallet_balance(
     wallet = await session.get(Wallet, wallet_id)
     if not wallet:
         raise HTTPException(status_code=404, detail="Wallet not found")
-    return wallet
+    return WalletRead.model_validate({"balance": wallet.balance})
 
 
 async def create_new_transaction(
     wallet_id: "UUID",
     operation: "OperationRequest",
     session: "AsyncSession",
-) -> Dict:
+) -> OperationSuccess | OperationFailed:
     try:
         new_operation = Operation(
             wallet_id=wallet_id,
@@ -58,13 +59,13 @@ async def create_new_transaction(
             wallet.balance -= operation.amount
         await session.flush()
         await session.commit()
-        return {
-            'message': 'transaction successfully',
-            'balance': wallet.balance,
-        }
+        return OperationSuccess.model_validate({
+            'message': 'The operation was successful!',
+            'new_wallet_balance': wallet.balance,
+        })
     except SQLAlchemyError as error:
         await session.rollback()
-        return {
-            'message': 'transaction ',
-            'error message': error,
-        }
+        return OperationFailed.model_validate({
+            'message': 'The operation failed!!!',
+            'error_message': error,
+        })
