@@ -31,6 +31,7 @@ class DatabaseHelper:
             pool_recycle=pool_recycle,
             pool_pre_ping=pool_pre_ping,
             max_overflow=max_overflow,
+            connect_args={"prepared_statement_cache_size": 0},
         )
         self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
             bind=self.engine,
@@ -44,7 +45,8 @@ class DatabaseHelper:
 
     async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
         async with self.session_factory() as session:
-            yield session
+            async with session.begin():
+                yield session
 
 
 db_helper = DatabaseHelper(
