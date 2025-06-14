@@ -6,7 +6,7 @@ authors = ["Shilov Ilia <shilov.spike2250@yandex.ru>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = "^3.10"
 fastapi = "^0.115.12"
 uvicorn = {extras = ["standard"], version = "^0.34.2"}
 pydantic = {extras = ["email"], version = "^2.11.5"}
