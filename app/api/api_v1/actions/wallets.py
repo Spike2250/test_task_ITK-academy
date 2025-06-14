@@ -56,10 +56,11 @@ async def create_new_transaction(
 
         session.add(
             Operation(
-            wallet_id=wallet_id,
-            operation_type=operation.operation_type,
-            amount=operation.amount,
-        ))
+                wallet_id=wallet_id,
+                operation_type=operation.operation_type,
+                amount=operation.amount,
+            )
+        )
 
         await session.flush()
         await session.commit()
