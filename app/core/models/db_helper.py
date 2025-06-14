@@ -17,6 +17,9 @@ class DatabaseHelper:
         echo: bool = False,
         echo_pool: bool = False,
         pool_size: int = 5,
+        pool_timeout: int = 20,
+        pool_recycle: int = 1200,
+        pool_pre_ping: bool = True,
         max_overflow: int = 10,
     ):
         self.engine: AsyncEngine = create_async_engine(
@@ -24,6 +27,9 @@ class DatabaseHelper:
             echo=echo,
             echo_pool=echo_pool,
             pool_size=pool_size,
+            pool_timeout=pool_timeout,
+            pool_recycle=pool_recycle,
+            pool_pre_ping=pool_pre_ping,
             max_overflow=max_overflow,
         )
         self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
@@ -46,5 +52,8 @@ db_helper = DatabaseHelper(
     echo=settings.db.echo,
     echo_pool=settings.db.echo_pool,
     pool_size=settings.db.pool_size,
+    pool_timeout=settings.db.pool_timeout,
+    pool_recycle=settings.db.pool_recycle,
+    pool_pre_ping=settings.db.pool_pre_ping,
     max_overflow=settings.db.max_overflow,
 )

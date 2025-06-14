@@ -30,6 +30,9 @@ class DatabaseConfig(BaseModel):
     echo: bool = False
     echo_pool: bool = False
     pool_size: int = 50
+    pool_timeout: int = 30
+    pool_recycle: int = 1800
+    pool_pre_ping: bool = True
     max_overflow: int = 10
 
     naming_convention: Dict = {
