@@ -1,16 +1,18 @@
 import uuid
 from typing import Annotated, TYPE_CHECKING
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 
-from core.models import db_helper, Wallet
+from core.models import db_helper
 from core.schemas.wallet import (
     WalletRead,
     WalletCreate,
 )
-from utils import GUID
 
-from .actions import create_new_wallet
+from .actions import (
+    create_new_wallet,
+    get_wallet_balance,
+)
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,17 +27,14 @@ router = APIRouter(
     "/{wallet_id}",
     response_model=WalletRead,
 )
-async def get_wallet_balance(
+async def get_balance(
     wallet_id: uuid.UUID,
     session: Annotated[
         "AsyncSession",
         Depends(db_helper.session_getter),
     ],
 ):
-    wallet = await session.get(Wallet, wallet_id)
-    if not wallet:
-        raise HTTPException(status_code=404, detail="Wallet not found")
-    return wallet
+    return await get_wallet_balance(wallet_id, session)
 
 
 @router.post(
