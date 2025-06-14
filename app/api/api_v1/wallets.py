@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated, TYPE_CHECKING
+from typing import Annotated, TYPE_CHECKING, Dict
 
 from fastapi import APIRouter, Depends
 
@@ -8,10 +8,12 @@ from core.schemas.wallet import (
     WalletRead,
     WalletCreate,
 )
+from core.schemas.operation import OperationRequest
 
 from .actions import (
     create_new_wallet,
     get_wallet_balance,
+    create_new_transaction,
 )
 
 if TYPE_CHECKING:
@@ -50,8 +52,20 @@ async def create_wallet(
     return await create_new_wallet(session)
 
 
-# @router.put(
-#     "/{wallet_id}/operation",
-#     response_model=WalletRead,
-# )
-# async def
+@router.put(
+    "/{wallet_id}/operation",
+    response_model=WalletRead,
+)
+async def create_transaction(
+    wallet_id: uuid.UUID,
+    session: Annotated[
+        "AsyncSession",
+        Depends(db_helper.session_getter),
+    ],
+    operation: OperationRequest = Depends(),
+) -> Dict:
+    return await create_new_transaction(
+        wallet_id,
+        operation,
+        session,
+    )

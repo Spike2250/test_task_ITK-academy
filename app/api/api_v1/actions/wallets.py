@@ -1,14 +1,18 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 from fastapi import HTTPException
+from sqlalchemy.exc import SQLAlchemyError
 
 from core.models.wallet import Wallet
+from core.models.operation import Operation
 from core.schemas.wallet import WalletCreate, WalletRead
+from core.schemas.enums import OperationTypes
 
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from uuid import UUID
+    from core.schemas.operation import OperationRequest
 
 
 async def create_new_wallet(
@@ -32,3 +36,35 @@ async def get_wallet_balance(
     if not wallet:
         raise HTTPException(status_code=404, detail="Wallet not found")
     return wallet
+
+
+async def create_new_transaction(
+    wallet_id: "UUID",
+    operation: "OperationRequest",
+    session: "AsyncSession",
+) -> Dict:
+    try:
+        new_operation = Operation(
+            wallet_id=wallet_id,
+            operation_type=operation.operation_type,
+            amount=operation.amount,
+        )
+        session.add(new_operation)
+
+        wallet = await get_wallet_balance(wallet_id, session)
+        if operation.operation_type == OperationTypes.DEPOSIT:
+            wallet.balance += operation.amount
+        elif operation.operation_type == OperationTypes.WITHDRAW:
+            wallet.balance -= operation.amount
+        await session.flush()
+        await session.commit()
+        return {
+            'message': 'transaction successfully',
+            'balance': wallet.balance,
+        }
+    except SQLAlchemyError as error:
+        await session.rollback()
+        return {
+            'message': 'transaction ',
+            'error message': error,
+        }
