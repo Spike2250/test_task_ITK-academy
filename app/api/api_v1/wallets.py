@@ -12,12 +12,15 @@ from core.schemas.operation import (
     OperationRequest,
     OperationSuccess,
     OperationFailed,
+    OperationRead,
 )
 
 from .actions import (
     create_new_wallet,
     get_wallet_balance,
     create_new_transaction,
+    get_operation,
+    get_operations_history,
 )
 
 if TYPE_CHECKING:
@@ -73,3 +76,33 @@ async def create_transaction(
         operation,
         session,
     )
+
+
+@router.get(
+    "/{wallet_id}/operation/{operation_id}",
+    response_model=OperationRead,
+)
+async def get_operation_from_id(
+    wallet_id: uuid.UUID,
+    operation_id: uuid.UUID,
+    session: Annotated[
+        "AsyncSession",
+        Depends(db_helper.session_getter),
+    ],
+):
+    return await get_operation(wallet_id, operation_id, session)
+
+
+@router.get(
+    "/{wallet_id}/operations",
+    response_model=list[OperationRead],
+)
+async def get_operations(
+    wallet_id: uuid.UUID,
+    session: Annotated[
+        "AsyncSession",
+        Depends(db_helper.session_getter),
+    ],
+    limit: int = 25,
+):
+    return await get_operations_history(wallet_id, session, limit)

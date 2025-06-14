@@ -1,8 +1,11 @@
+import datetime
 from decimal import Decimal
+from uuid import UUID
 
 from pydantic import BaseModel, Field
 
 from .enums import OperationTypes
+from utils.generics import TIMESTAMPAware
 
 
 class OperationRequest(BaseModel):
@@ -20,3 +23,10 @@ class OperationSuccess(OperationResult):
 
 class OperationFailed(OperationResult):
     error_message: str
+
+
+class OperationRead(OperationRequest):
+    created_at: datetime.datetime
+    id: UUID
+
+

@@ -1,12 +1,15 @@
-from typing import TYPE_CHECKING, Dict
+from typing import TYPE_CHECKING
+from datetime import datetime
 
 from fastapi import HTTPException
+
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.future import select
 
 from core.models.wallet import Wallet
 from core.models.operation import Operation
 from core.schemas.wallet import WalletCreate, WalletRead
-from core.schemas.operation import OperationSuccess, OperationFailed
+from core.schemas.operation import OperationSuccess, OperationFailed, OperationRead
 from core.schemas.enums import OperationTypes
 
 
@@ -45,18 +48,19 @@ async def create_new_transaction(
     session: "AsyncSession",
 ) -> OperationSuccess | OperationFailed:
     try:
-        new_operation = Operation(
-            wallet_id=wallet_id,
-            operation_type=operation.operation_type,
-            amount=operation.amount,
-        )
-        session.add(new_operation)
-
         wallet = await get_wallet_balance(wallet_id, session)
         if operation.operation_type == OperationTypes.DEPOSIT:
             wallet.balance += operation.amount
         elif operation.operation_type == OperationTypes.WITHDRAW:
             wallet.balance -= operation.amount
+
+        session.add(
+            Operation(
+            wallet_id=wallet_id,
+            operation_type=operation.operation_type,
+            amount=operation.amount,
+        ))
+
         await session.flush()
         await session.commit()
         return OperationSuccess.model_validate({
@@ -69,3 +73,56 @@ async def create_new_transaction(
             'message': 'The operation failed!!!',
             'error_message': error,
         })
+
+
+async def __get_operation(
+    operation_id: "UUID",
+    session: "AsyncSession",
+) -> OperationRead:
+
+    operation = await session.get(Operation, operation_id)
+    if not operation:
+        raise HTTPException(status_code=404, detail="Operation not found")
+    return OperationRead.model_validate({
+        'operation_type': operation.operation_type,
+        'amount': operation.amount,
+        'created_at': operation.created_at,
+        'id': operation.id,
+    })
+
+
+async def get_operation(
+    wallet_id: "UUID",
+    operation_id: "UUID",
+    session: "AsyncSession",
+) -> OperationRead:
+    if await get_wallet_balance(wallet_id, session):
+        return await __get_operation(operation_id, session)
+
+
+async def __get_operations(
+    wallet_id: "UUID",
+    session: "AsyncSession",
+    limit: int = 25,
+) -> list[OperationRead]:
+    result = await session.execute(
+        select(Operation).filter(Operation.wallet_id == wallet_id).order_by(Operation.created_at.desc()).limit(limit)
+    )
+    operations = result.scalars().all()
+    return [
+        OperationRead(
+            operation_type=opr.operation_type,
+            amount=opr.amount,
+            created_at=opr.created_at,
+            id=opr.id,
+        ) for opr in operations
+    ]
+
+
+async def get_operations_history(
+    wallet_id: "UUID",
+    session: "AsyncSession",
+    limit: int = 25,
+) -> list[OperationRead]:
+    if await get_wallet_balance(wallet_id, session):
+        return await __get_operations(wallet_id, session, limit)

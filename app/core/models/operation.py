@@ -11,7 +11,6 @@ from sqlalchemy.orm import (
     Mapped,
 )
 
-from utils import GUID
 from .base import Base
 from .mixins import (
     UuidIdPkMixin,
