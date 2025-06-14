@@ -48,15 +48,7 @@ async def create_wallet(
         Depends(db_helper.session_getter),
     ],
 ):
-    # return await create_new_wallet(session)
-    new_wallet = Wallet()
-    session.add(new_wallet)
-    await session.flush()
-    await session.commit()
-    return WalletCreate.model_validate({
-        "id": new_wallet.id,
-        "balance": new_wallet.balance,
-    })
+    return await create_new_wallet(session)
 
 
 # @router.put(
