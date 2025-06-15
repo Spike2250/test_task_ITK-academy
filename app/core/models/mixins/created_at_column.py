@@ -3,7 +3,7 @@ from sqlalchemy.orm import (
     Mapped,
     mapped_column,
 )
-from utils import TIMESTAMPAware, now_utc
+from app.utils import TIMESTAMPAware, now_utc
 
 
 class CreatedAtColumnMixin:

@@ -16,7 +16,7 @@ from .mixins import (
     UuidIdPkMixin,
     CreatedAtColumnMixin,
 )
-from core.schemas.enums import OperationTypes
+from app.core.schemas.enums import OperationTypes
 
 
 class Operation(UuidIdPkMixin, CreatedAtColumnMixin, Base):

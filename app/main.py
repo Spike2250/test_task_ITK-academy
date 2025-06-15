@@ -3,10 +3,10 @@ from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 from contextlib import asynccontextmanager
 
-from core.config import settings
+from app.core.config import settings
+from app.core.models import db_helper
 
-from api import router as api_router
-from core.models import db_helper
+from app.api import router as api_router
 
 
 @asynccontextmanager

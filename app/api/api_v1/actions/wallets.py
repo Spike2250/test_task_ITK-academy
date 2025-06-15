@@ -6,17 +6,17 @@ from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
 
-from core.models.wallet import Wallet
-from core.models.operation import Operation
-from core.schemas.wallet import WalletCreate, WalletRead
-from core.schemas.operation import OperationSuccess, OperationFailed, OperationRead
-from core.schemas.enums import OperationTypes
+from app.core.models.wallet import Wallet
+from app.core.models.operation import Operation
+from app.core.schemas.wallet import WalletCreate, WalletRead
+from app.core.schemas.operation import OperationSuccess, OperationFailed, OperationRead
+from app.core.schemas.enums import OperationTypes
 
 
 if TYPE_CHECKING:
     from sqlalchemy.ext.asyncio import AsyncSession
     from uuid import UUID
-    from core.schemas.operation import OperationRequest
+    from app.core.schemas.operation import OperationRequest
 
 
 async def create_new_wallet(

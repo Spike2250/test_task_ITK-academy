@@ -3,12 +3,12 @@ from typing import Annotated, TYPE_CHECKING, Dict
 
 from fastapi import APIRouter, Depends
 
-from core.models import db_helper
-from core.schemas.wallet import (
+from app.core.models import db_helper
+from app.core.schemas.wallet import (
     WalletRead,
     WalletCreate,
 )
-from core.schemas.operation import (
+from app.core.schemas.operation import (
     OperationRequest,
     OperationSuccess,
     OperationFailed,

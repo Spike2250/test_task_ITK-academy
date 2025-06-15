@@ -2,7 +2,9 @@ from typing import Dict
 
 from pydantic import (
     BaseModel,
-    PostgresDsn
+    PostgresDsn,
+    model_validator,
+    AnyUrl,
 )
 from pydantic_settings import (
     BaseSettings,
@@ -26,7 +28,7 @@ class ApiPrefix(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    url: PostgresDsn
+    url: PostgresDsn | AnyUrl
     echo: bool = False
     echo_pool: bool = False
     pool_size: int = 50
@@ -53,7 +55,18 @@ class Settings(BaseSettings):
     )
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
-    db: DatabaseConfig
+    db: DatabaseConfig | None = None
+
+    @model_validator(mode='after')
+    def validate_db(self):
+        if self.db is None:
+            # Значение по умолчанию для тестовой среды
+            self.db = DatabaseConfig(
+                url="sqlite+aiosqlite:///:memory:",
+                echo=False,
+                echo_pool=False
+            )
+        return self
 
 
 settings = Settings()

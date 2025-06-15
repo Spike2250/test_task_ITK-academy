@@ -5,7 +5,6 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from .enums import OperationTypes
-from utils.generics import TIMESTAMPAware
 
 
 class OperationRequest(BaseModel):

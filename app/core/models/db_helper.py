@@ -1,5 +1,7 @@
 from typing import AsyncGenerator
 
+from pydantic import PostgresDsn, AnyUrl
+
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncEngine,
@@ -7,13 +9,14 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
-from core.config import settings
+from app.core.config import settings
 
 
 class DatabaseHelper:
     def __init__(
         self,
         url: str,
+        test: bool = False,
         echo: bool = False,
         echo_pool: bool = False,
         pool_size: int = 5,
@@ -22,17 +25,23 @@ class DatabaseHelper:
         pool_pre_ping: bool = True,
         max_overflow: int = 10,
     ):
-        self.engine: AsyncEngine = create_async_engine(
-            url=url,
-            echo=echo,
-            echo_pool=echo_pool,
-            pool_size=pool_size,
-            pool_timeout=pool_timeout,
-            pool_recycle=pool_recycle,
-            pool_pre_ping=pool_pre_ping,
-            max_overflow=max_overflow,
-            connect_args={"prepared_statement_cache_size": 0},
-        )
+        if not test:
+            self.engine: AsyncEngine = create_async_engine(
+                url=url,
+                echo=echo,
+                echo_pool=echo_pool,
+                pool_size=pool_size,
+                pool_timeout=pool_timeout,
+                pool_recycle=pool_recycle,
+                pool_pre_ping=pool_pre_ping,
+                max_overflow=max_overflow,
+                connect_args={"prepared_statement_cache_size": 0},
+            )
+        else:
+            self.engine: AsyncEngine = create_async_engine(
+                url=url,
+                echo=echo,
+            )
         self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
             bind=self.engine,
             autoflush=False,
@@ -49,13 +58,22 @@ class DatabaseHelper:
                 yield session
 
 
-db_helper = DatabaseHelper(
-    url=str(settings.db.url),
-    echo=settings.db.echo,
-    echo_pool=settings.db.echo_pool,
-    pool_size=settings.db.pool_size,
-    pool_timeout=settings.db.pool_timeout,
-    pool_recycle=settings.db.pool_recycle,
-    pool_pre_ping=settings.db.pool_pre_ping,
-    max_overflow=settings.db.max_overflow,
-)
+if isinstance(settings.db.url, PostgresDsn):
+    db_helper = DatabaseHelper(
+        url=str(settings.db.url),
+        echo=settings.db.echo,
+        echo_pool=settings.db.echo_pool,
+        pool_size=settings.db.pool_size,
+        pool_timeout=settings.db.pool_timeout,
+        pool_recycle=settings.db.pool_recycle,
+        pool_pre_ping=settings.db.pool_pre_ping,
+        max_overflow=settings.db.max_overflow,
+    )
+elif isinstance(settings.db.url, AnyUrl):
+    db_helper = DatabaseHelper(
+        test=True,
+        url=str(settings.db.url),
+        echo=False
+    )
+else:
+    raise ValueError
