@@ -48,7 +48,11 @@ async def create_new_transaction(
     session: "AsyncSession",
 ) -> OperationSuccess | OperationFailed:
     try:
-        wallet = await session.get(Wallet, wallet_id, with_for_update=True)
+        wallet = await session.get(
+            Wallet,
+            wallet_id,
+            with_for_update=True,  # важно(!) для контроля изменений
+        )
         if not wallet:
             raise HTTPException(status_code=404, detail="Wallet not found")
 
@@ -74,9 +78,9 @@ async def create_new_transaction(
                 amount=operation.amount,
             )
         )
-
         await session.flush()
         await session.refresh(wallet)
+
         return OperationSuccess.model_validate({
             'message': 'The operation was successful!',
             'new_wallet_balance': wallet.balance,
@@ -119,9 +123,11 @@ async def __get_operations(
     session: "AsyncSession",
     limit: int = 25,
 ) -> list[OperationRead]:
-    result = await session.execute(
-        select(Operation).filter(Operation.wallet_id == wallet_id).order_by(Operation.created_at.desc()).limit(limit)
-    )
+    query = select(Operation)\
+                .filter(Operation.wallet_id == wallet_id)\
+                .order_by(Operation.created_at.desc())\
+                .limit(limit)
+    result = await session.execute(query)
     operations = result.scalars().all()
     return [
         OperationRead(

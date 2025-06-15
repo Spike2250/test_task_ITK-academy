@@ -32,6 +32,19 @@ router = APIRouter(
 )
 
 
+@router.post(
+    "",
+    response_model=WalletCreate,
+)
+async def create_wallet(
+    session: Annotated[
+        "AsyncSession",
+        Depends(db_helper.session_getter),
+    ],
+):
+    return await create_new_wallet(session)
+
+
 @router.get(
     "/{wallet_id}",
     response_model=WalletRead,
@@ -44,19 +57,6 @@ async def get_balance(
     ],
 ):
     return await get_wallet_balance(wallet_id, session)
-
-
-@router.post(
-    "",
-    response_model=WalletCreate,
-)
-async def create_wallet(
-    session: Annotated[
-        "AsyncSession",
-        Depends(db_helper.session_getter),
-    ],
-):
-    return await create_new_wallet(session)
 
 
 @router.put(
