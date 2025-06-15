@@ -15,10 +15,14 @@ sqlalchemy = {extras = ["asyncio"], version = "^2.0.41"}
 asyncpg = "^0.30.0"
 alembic = "^1.16.1"
 orjson = "^3.10.18"
+httpx = "^0.28.1"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^25.1.0"
+pytest = "^8.4.0"
+pytest-asyncio = "^1.0.0"
+aiosqlite = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core"]
