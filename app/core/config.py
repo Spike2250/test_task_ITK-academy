@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 
 from pydantic import (
@@ -10,6 +11,11 @@ from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
 )
+
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 
 class RunConfig(BaseModel):
@@ -28,7 +34,9 @@ class ApiPrefix(BaseModel):
 
 
 class DatabaseConfig(BaseModel):
-    url: PostgresDsn | AnyUrl
+    url: PostgresDsn | AnyUrl = os.getenv(
+        'APP_CONFIG__DB__URL'
+    )
     echo: bool = False
     echo_pool: bool = False
     pool_size: int = 50
@@ -55,18 +63,7 @@ class Settings(BaseSettings):
     )
     run: RunConfig = RunConfig()
     api: ApiPrefix = ApiPrefix()
-    db: DatabaseConfig | None = None
-
-    @model_validator(mode='after')
-    def validate_db(self):
-        if self.db is None:
-            # Значение по умолчанию для тестовой среды
-            self.db = DatabaseConfig(
-                url="sqlite+aiosqlite:///:memory:",
-                echo=False,
-                echo_pool=False
-            )
-        return self
+    db: DatabaseConfig = DatabaseConfig()
 
 
 settings = Settings()

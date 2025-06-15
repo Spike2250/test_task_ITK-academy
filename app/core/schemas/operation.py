@@ -8,8 +8,8 @@ from .enums import OperationTypes
 
 
 class OperationRequest(BaseModel):
-    operation_type: str = OperationTypes
-    amount: Decimal = Field(gt=0)
+    operation_type: OperationTypes = Field(default=OperationTypes.DEPOSIT)
+    amount: int = Field(json_schema_extra={"gt": 0})
 
 
 class OperationResult(BaseModel):
@@ -17,7 +17,7 @@ class OperationResult(BaseModel):
 
 
 class OperationSuccess(OperationResult):
-    new_wallet_balance: Decimal
+    new_wallet_balance: int
 
 
 class OperationFailed(OperationResult):
