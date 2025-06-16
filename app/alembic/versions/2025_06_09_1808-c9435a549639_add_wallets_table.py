@@ -1,7 +1,7 @@
 """add wallets table
 
 Revision ID: c9435a549639
-Revises: 
+Revises:
 Create Date: 2025-06-09 18:08:29.794209
 
 """
@@ -22,8 +22,16 @@ def upgrade() -> None:
     """Upgrade schema."""
     op.create_table(
         'wallets',
-        sa.Column('id', sa.Uuid(), nullable=False),
-        sa.Column('balance', sa.Numeric(precision=10, scale=2), nullable=False),
+        sa.Column(
+            'id',
+            sa.Uuid(),
+            nullable=False,
+        ),
+        sa.Column(
+            'balance',
+            sa.Numeric(precision=10, scale=2),
+            nullable=False,
+        ),
         sa.PrimaryKeyConstraint('id', name=op.f('pk_wallets'))
     )
 

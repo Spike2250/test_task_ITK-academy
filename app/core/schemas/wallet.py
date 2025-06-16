@@ -1,4 +1,3 @@
-from typing import Optional
 from decimal import Decimal
 from uuid import UUID
 

@@ -23,5 +23,3 @@ class OperationSuccess(OperationResult):
 class OperationRead(OperationRequest):
     created_at: datetime.datetime
     id: UUID
-
-

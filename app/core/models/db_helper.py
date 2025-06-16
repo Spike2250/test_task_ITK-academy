@@ -1,7 +1,5 @@
 from typing import AsyncGenerator
 
-from pydantic import PostgresDsn, AnyUrl
-
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncEngine,
@@ -35,7 +33,7 @@ class DatabaseHelper:
             max_overflow=max_overflow,
             connect_args={"prepared_statement_cache_size": 0},
             )
-        self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(
+        self.session_factory: async_sessionmaker[AsyncSession] = async_sessionmaker(  # noqa:E501
             bind=self.engine,
             autoflush=False,
             autocommit=False,

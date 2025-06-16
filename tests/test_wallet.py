@@ -3,8 +3,6 @@ from uuid import UUID
 from decimal import Decimal
 from httpx import AsyncClient
 from fastapi import status
-from fastapi import HTTPException
-import asyncio
 
 from .constants import (
     PREFIX,
@@ -29,7 +27,9 @@ async def test_wallet_creation_lifecycle(async_client: AsyncClient):
     assert balance_resp.status_code == status.HTTP_200_OK
     assert balance_resp.json()['balance'] == '0.00'
 
-    history_resp = await async_client.get(f"{PREFIX}/wallets/{wallet_id}/operations")
+    history_resp = await async_client.get(
+        f"{PREFIX}/wallets/{wallet_id}/operations"
+    )
     assert history_resp.status_code == status.HTTP_200_OK
     assert history_resp.json() == []
 
@@ -68,12 +68,14 @@ async def test_successful_deposit_and_withdraw(async_client: AsyncClient):
     ) == expected_balance
 
     # история операций
-    history_resp = await async_client.get(f"{PREFIX}/wallets/{wallet_id}/operations")
+    history_resp = await async_client.get(
+        f"{PREFIX}/wallets/{wallet_id}/operations"
+    )
     assert history_resp.status_code == status.HTTP_200_OK
     operations = history_resp.json()
     assert len(operations) == 2
 
-    operation = operations[0]  # последняя операция (сортировка по убыванию даты)
+    operation = operations[0]  # последняя операция (сортировка по убыванию даты)  # noqa: E501
     assert operation["operation_type"] == "WITHDRAW"
     assert Decimal(operation["amount"]) == expected_balance
 
@@ -107,7 +109,9 @@ async def test_overdraft_prevention(async_client: AsyncClient):
     assert "Insufficient funds" in error_data["detail"]
 
     # Проверяем, что операция не сохранилась
-    history_resp = await async_client.get(f"{PREFIX}/wallets/{wallet_id}/operations")
+    history_resp = await async_client.get(
+        f"{PREFIX}/wallets/{wallet_id}/operations"
+    )
     assert history_resp.status_code == status.HTTP_200_OK
     operations = history_resp.json()
     assert len(operations) == 0
@@ -151,7 +155,9 @@ async def test_get_invalid_wallet(async_client: AsyncClient):
 #             assert response.status_code == 400
 #
 #     # Получаем финальный баланс
-#     final_balance_resp = await async_client.get(f"{PREFIX}/wallets/{wallet_id}")
+#     final_balance_resp = await async_client.get(
+#         f"{PREFIX}/wallets/{wallet_id}"
+#     )
 #     final_balance = Decimal(
 #         final_balance_resp.json()["balance"]
 #     )

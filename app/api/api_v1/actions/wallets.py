@@ -2,7 +2,6 @@ from typing import TYPE_CHECKING
 
 from fastapi import HTTPException
 
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
 
 from app.core.models.wallet import Wallet
