@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class WalletRead(BaseModel):
-    balance: int = Field(json_schema_extra={'et': 0})
+    balance: Decimal = Field(json_schema_extra={'et': 0})
 
 
 class WalletCreate(WalletRead):
