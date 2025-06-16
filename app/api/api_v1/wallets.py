@@ -1,5 +1,5 @@
 import uuid
-from typing import Annotated, TYPE_CHECKING, Dict
+from typing import Annotated, TYPE_CHECKING
 
 from fastapi import APIRouter, Depends
 
@@ -11,7 +11,6 @@ from app.core.schemas.wallet import (
 from app.core.schemas.operation import (
     OperationRequest,
     OperationSuccess,
-    OperationFailed,
     OperationRead,
 )
 
@@ -61,7 +60,7 @@ async def get_balance(
 
 @router.put(
     "/{wallet_id}/operation",
-    response_model=OperationSuccess | OperationFailed,
+    response_model=OperationSuccess
 )
 async def create_transaction(
     wallet_id: uuid.UUID,

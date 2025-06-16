@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING
-from datetime import datetime
 
 from fastapi import HTTPException
 
@@ -9,7 +8,7 @@ from sqlalchemy.future import select
 from app.core.models.wallet import Wallet
 from app.core.models.operation import Operation
 from app.core.schemas.wallet import WalletCreate, WalletRead
-from app.core.schemas.operation import OperationSuccess, OperationFailed, OperationRead
+from app.core.schemas.operation import OperationSuccess, OperationRead
 from app.core.schemas.enums import OperationTypes
 
 
@@ -46,51 +45,44 @@ async def create_new_transaction(
     wallet_id: "UUID",
     operation: "OperationRequest",
     session: "AsyncSession",
-) -> OperationSuccess | OperationFailed:
-    try:
-        wallet = await session.get(
-            Wallet,
-            wallet_id,
-            with_for_update=True,  # важно(!) для контроля изменений
-        )
-        if not wallet:
-            raise HTTPException(status_code=404, detail="Wallet not found")
+) -> OperationSuccess:
+    wallet = await session.get(
+        Wallet,
+        wallet_id,
+        with_for_update=True,  # важно(!) для контроля изменений
+    )
+    if not wallet:
+        raise HTTPException(status_code=404, detail="Wallet not found")
 
-        if operation.operation_type == OperationTypes.DEPOSIT:
-            wallet.balance += operation.amount
-        elif operation.operation_type == OperationTypes.WITHDRAW:
-            if wallet.balance < operation.amount:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Insufficient funds"
-                )
-            wallet.balance -= operation.amount
-        else:
+    if operation.operation_type == OperationTypes.DEPOSIT:
+        wallet.balance += operation.amount
+    elif operation.operation_type == OperationTypes.WITHDRAW:
+        if wallet.balance < operation.amount:
             raise HTTPException(
                 status_code=400,
-                detail="Invalid operation type"
+                detail="Insufficient funds"
             )
-
-        session.add(
-            Operation(
-                wallet_id=wallet_id,
-                operation_type=operation.operation_type,
-                amount=operation.amount,
-            )
+        wallet.balance -= operation.amount
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid operation type"
         )
-        await session.flush()
-        await session.refresh(wallet)
 
-        return OperationSuccess.model_validate({
-            'message': 'The operation was successful!',
-            'new_wallet_balance': wallet.balance,
-        })
-    except SQLAlchemyError | HTTPException as error:
-        await session.rollback()
-        return OperationFailed.model_validate({
-            'message': 'The operation failed!!!',
-            'error_message': error,
-        })
+    session.add(
+        Operation(
+            wallet_id=wallet_id,
+            operation_type=operation.operation_type,
+            amount=operation.amount,
+        )
+    )
+    await session.flush()
+    await session.refresh(wallet)
+
+    return OperationSuccess.model_validate({
+        'message': 'The operation was successful!',
+        'new_wallet_balance': wallet.balance,
+    })
 
 
 async def __get_operation(
