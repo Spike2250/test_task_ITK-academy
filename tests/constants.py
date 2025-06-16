@@ -3,10 +3,11 @@ from app.core.schemas.operation import (
     OperationTypes,
 )
 from uuid import uuid4
+from decimal import Decimal
 
 
 PREFIX = "/api/v1"
-TEST_AMOUNT = 100
+TEST_AMOUNT = Decimal(100)
 TEST_DEPOSIT = OperationRequest(
     operation_type=OperationTypes.DEPOSIT,
     amount=TEST_AMOUNT
