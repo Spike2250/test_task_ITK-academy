@@ -4,7 +4,6 @@ from typing import Dict
 from pydantic import (
     BaseModel,
     PostgresDsn,
-    model_validator,
     AnyUrl,
 )
 from pydantic_settings import (
